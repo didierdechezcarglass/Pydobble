@@ -1,6 +1,5 @@
 """
-Ecrit par Quentin Bartolone, élève de Terminale au lycée
-Henri Moissan
+Made by didierdechezcarglass on github!
 """
 from random import randint, sample
 import pygame
