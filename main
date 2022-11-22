@@ -1,0 +1,333 @@
+"""
+Made by didierdechezcarglass on github!
+"""
+import pygame
+from codes.fonctions import menuprincipal, gameloop, update, generateur, simb
+# toute les images stockés dans des variables qui peuvent être réutilisé dans fonctions!
+bj = pygame.image.load("images\\boutons\\button_jouer.png")
+br = pygame.image.load("images\\boutons\\button_regles.png")
+bq = pygame.image.load("images\\boutons\\button_quitter.png")
+brr = pygame.image.load("images\\boutons\\button_retour.png")
+bps = pygame.image.load("images\\boutons\\bouton_page_suivante.png")
+bpp = pygame.image.load("images\\boutons\\bouton_page_precedante.png")
+men = pygame.image.load("images\\menu\\menu.jpg")
+mj = pygame.image.load("images\\menu\\menu_jouer.jpg")
+mr = pygame.image.load("images\\menu\\pages_regles\\page_1.png")
+carte = pygame.image.load("images\\cartes\\rond carte.png")
+# création de l'affichage
+pygame.init()
+pygame.font.init()
+pygame.mixer.init()
+sonc = pygame.mixer.Sound("sons\\click.mp3")
+sonok = pygame.mixer.Sound("sons\\ok.mp3")
+tournepage = pygame.mixer.Sound("sons\\tournepage.mp3")
+musique_jouer = pygame.mixer.Sound("sons\\musique_jouer.mp3")
+decompte = pygame.mixer.Sound("sons\\decompte.mp3")
+decompte.set_volume(0.3)
+pygame.display.set_caption("Le jeu du Dobble!")
+pygame.display.set_icon(pygame.image.load("images\\cartes\\symboles\\dobble.png"))
+# variables globales
+chrono = pygame.time.Clock()
+SECONDES = 0
+ATTENTE = 0
+crota = []
+cimage = []
+ecran = pygame.display.set_mode((800, 600))
+police = pygame.font.SysFont("Corbel", 25)
+ecran.blit(pygame.transform.scale(men, (800, 600)), (0, 0))
+j = ecran.blit(pygame.transform.scale(bj, (200, 50)), (300, 250))
+r = ecran.blit(pygame.transform.scale(br, (200, 50)), (300, 305))
+q = ecran.blit(pygame.transform.scale(bq, (200, 50)), (300, 360))
+TEMP = 0
+SCORE = 0
+corrmi = pygame.Rect(0, 0, 0, 0)
+corrpi = pygame.Rect(0, 0, 0, 0)
+retour = pygame.Rect(0, 0, 0, 0)
+suivante = pygame.Rect(0, 0, 0, 0)
+precedente = pygame.Rect(0, 0, 0, 0)
+corr = ()
+pygame.display.flip()
+
+# génération de cartes
+signes = [
+    "zèbre", "pomme", "bonhomme", "goutte", "clown", "ampoule",
+    "fromage", "clef", "dauphin", "biberon", "cadenas",
+    "araignée", "coccinelle", "toile", "dinosaure",
+    "soleil", "coeur", "interdit", "cactus", "point d'interrogation",
+    "lune", "flocon", "horloge", "fleur", "yin-yang",
+    "dobble", "fantôme", "bouche", "chien", "crayon", "clef de sol",
+    "cible", "tête de mort", "bombe", "art", "flamme",
+    "igloo", "chat", "peinture", "voiture", "marteau", "trèfle",
+    "carotte", "lunette", "ciseaux", "feuille",
+    "point d'exclamation", "dragon", "bougie", "bonhomme de neige",
+    "glaçon", "ancre", "arbre", "oeil violet",
+    "cheval", "eclair", "tortue"]  # liste de tout les signes
+
+# dictionnaire des images à charger pour chaque symbole
+b = {j: j + ".png" for j in signes}
+# les cartes
+cartes = generateur(signes)
+# deuxième liste de cartes pour pouvoir faire en boucle le jeu
+cartescomplet = cartes.copy()
+
+# variables de boucles
+TOURNE = True
+ETAT = 0
+PAGE = 1
+
+
+# fonction de la boucle du jeu. Ces fonctions utilisent la
+# plupart des variables définies dans ce fichier
+def click_event(utils):
+    """
+    Toutes les instructions consécutives à un clic
+    """
+    sonc.play()
+    cordx, cordy = pygame.mouse.get_pos()
+    if utils[0].collidepoint(cordx, cordy) and utils[3] == 0:
+        # lorsque l'on clique sur le bouton "règles"
+        utils[5], utils[6], utils[7], utils[8], utils[3] = regles(
+            [utils[5], utils[6], utils[7], utils[8], utils[3]])
+
+    if utils[2].collidepoint(cordx, cordy) and utils[3] == 0:
+        # lorsque l'on clique sur le bouton "quitter"
+        utils[4] = False
+
+    if utils[1].collidepoint(cordx, cordy) and utils[3] == 0:
+        # début du temps d'attente
+        sonok.play()
+        utils[9].tick(1000)
+        utils[10] = utils[11].copy()
+        utils[12] = 0
+        ecran.fill("black")
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        utils[5] = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        texte_secondes = pygame.font.SysFont("Corbel", 200).render(
+            f'{3 - (utils[12]//1000)}', True, (255, 255, 255))
+        ecran.blit(texte_secondes, (375, 150))
+        utils[3] = 5
+        pygame.display.flip()
+
+    if utils[3] != 0 and utils[5].collidepoint(cordx, cordy):
+        # retour au menu principal
+        musique_jouer.stop()
+        utils[13] = 0
+        ecran.fill("black")
+        menu = menuprincipal(ecran)
+        utils[1] = menu[0]
+        utils[0] = menu[1]
+        utils[2] = menu[2]
+        utils[3] = 0
+        pygame.display.flip()
+
+    if utils[3] == 2 and utils[6].collidepoint(cordx, cordy):
+        # passage à la page suivante
+        utils[8], utils[6], utils[7], utils[5] = next_page_event([
+            utils[8], utils[6], utils[7], utils[5]])
+
+    if utils[3] == 2 and utils[7].collidepoint(cordx, cordy):
+        # retour à la page précédente
+        utils[8], utils[6], utils[7], utils[5] = previous_page_event(
+            [utils[8], utils[6], utils[7], utils[5]])
+
+    collides = (utils[15].collidepoint(cordx, cordy) or utils[16].collidepoint(cordx, cordy))
+    if utils[3] == 1 and collides:
+        # incrémentation du score et changement de carte
+        sonok.play()
+        utils[14] += utils[13]
+        utils[13] = 0
+        ecran.fill(pygame.Color("black"))
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        utils[5] = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        updated = update((utils[17], b, utils[10], carte, ecran, utils[18], utils[19]))
+        utils[17] = updated[0]
+        utils[15] = updated[1]
+        utils[16] = updated[2]
+        utils[18] = updated[3]
+        utils[19] = updated[4]
+        texte_cartes = police.render(f'Cartes restantes : {str(len(utils[10]))}', True, (
+            255, 255, 255))
+        ecran.blit(texte_cartes, (300, 0))
+        pygame.draw.rect(ecran, (95, 59, 45), pygame.Rect(300, 40, 200, 40))
+        texte_sec = police.render(f'Temps restant : {10 - (utils[20]//1000)}', True, (
+            255, 255, 255))
+        ecran.blit(texte_sec, (300, 40))
+        pygame.display.flip()
+        utils[20] += 1
+    return utils
+
+
+def next_page_event(changed):
+    """
+    Passage à la page suivante
+    """
+    if changed[0] < 3:
+        tournepage.play()
+        changed[0] += 1
+        ecran.blit(pygame.transform.scale(pygame.image.load(
+            f"images\\menu\\pages_regles\\page_{changed[0]}.png"), (800, 600)), (0, 0))
+        if changed[0] != 3:
+            changed[1] = ecran.blit(pygame.transform.scale(bps, (50, 50), ), (750, 550))
+        changed[2] = ecran.blit(pygame.transform.scale(bpp, (50, 50)), (0, 550))
+        changed[3] = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        pygame.display.flip()
+    return changed
+
+
+def previous_page_event(changes):
+    """
+    Retour à la page précédente
+    """
+    if changes[0] > 1:
+        tournepage.play()
+        changes[0] -= 1
+        ecran.blit(pygame.transform.scale(pygame.image.load(
+            f"images\\menu\\pages_regles\\page_{changes[0]}.png"), (800, 600)), (0, 0))
+        changes[1] = ecran.blit(pygame.transform.scale(bps, (50, 50), ), (750, 550))
+        if changes[0] != 1:
+            changes[2] = ecran.blit(pygame.transform.scale(bpp, (50, 50)), (0, 550))
+        changes[3] = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        pygame.display.flip()
+    return changes
+
+
+def regles(regles_items):
+    """
+    Initialisation du menu règles
+    """
+    tournepage.play()
+    ecran.fill("black")
+    regles_items[2] = ecran.blit(pygame.transform.scale(bpp, (50, 50)), (0, 550))
+    ecran.blit(pygame.transform.scale(mr, (800, 600)), (0, 0))
+    regles_items[0] = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+    regles_items[1] = ecran.blit(pygame.transform.scale(bps, (50, 50), ), (750, 550))
+    regles_items[3] = 1
+    pygame.display.flip()
+    regles_items[4] = 2
+    return regles_items
+
+
+def wait_event(elements):
+    """
+    Attente de 3 secondes
+    """
+    attente, chronometre, bouton_retour = elements
+    ancienne_attente = attente // 1000
+    attente = attente + chronometre.tick(1000)
+    if attente // 1000 > ancienne_attente:
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        bouton_retour = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        texte_attente = pygame.font.SysFont("Corbel", 200).render(
+            f'{3 - (attente//1000)}', True, (255, 255, 255))
+        ecran.blit(texte_attente, (375, 150))
+        pygame.display.flip()
+    return attente, chronometre, bouton_retour
+
+
+def timer_event(elem):
+    """
+    chronométrage du joueur
+    """
+    sec, chronom = elem
+    ancienne_sec = sec // 1000
+    sec = sec + chronom.tick(1000)
+    if sec // 1000 > ancienne_sec:
+        pygame.draw.rect(ecran, (95, 59, 45), pygame.Rect(300, 40, 200, 40))
+        texte_chrono = police.render(f'Temps restant : {10 - (sec//1000)}', True, (255, 255, 255))
+        ecran.blit(texte_chrono, (300, 40))
+        pygame.display.flip()
+    return sec, chronom
+
+
+# boucle du jeu
+while TOURNE:
+    for i in pygame.event.get():
+        if i.type == pygame.QUIT:
+            TOURNE = False
+
+        if i.type == pygame.MOUSEBUTTONDOWN and i.button == 1:  # evenements de clicks
+            (r, j, q, ETAT, TOURNE, retour, suivante, precedente, PAGE,
+                chrono, cartes, cartescomplet, ATTENTE, SECONDES, TEMP, corrmi, corrpi,
+                corr, cimage, crota, SCORE) = click_event(
+                [r, j, q, ETAT, TOURNE, retour, suivante, precedente, PAGE, chrono,
+                    cartes, cartescomplet, ATTENTE, SECONDES, TEMP, corrmi, corrpi,
+                    corr, cimage, crota, SCORE])
+
+    if ETAT == 5:
+        # faire attendre le joueur 3 secondes avant de jouer
+        decompte.play()
+        ATTENTE, chrono, retour = wait_event((ATTENTE, chrono, retour))
+    if ETAT == 1:
+        # chrono de 10 secondes pour que le joueur soit limité dans le temps
+        SECONDES, chrono = timer_event((SECONDES, chrono))
+
+    if ATTENTE > 3000 and ETAT == 5:  # début du moment de jeu
+        decompte.stop()
+        TEMP = 0
+        chrono.tick(1000)
+        SECONDES = 0
+        SCORE = 0
+        ecran.fill("black")
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        retour = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        corr = gameloop(cartes, carte, b, ecran)
+        corrm = corr[0]
+        corrp = corr[1]
+        cimage = corr[4]
+        crota = corr[5]
+        INDEX_J = corr[6]
+        INDEX_M = corr[7]
+        ccorrm = simb[corr[2].index(corrm)]
+        ccorrp = simb[corr[3].index(corrp) - 8]
+        corrmi = ecran.blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
+            "images\\cartes\\symboles\\" + b[corrm]), (
+                INDEX_M[0], INDEX_M[0])), INDEX_M[1]), ccorrm)
+        corrpi = ecran.blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
+            "images\\cartes\\symboles\\" + b[corrp]), (
+                cimage[INDEX_J], cimage[INDEX_J])), crota[INDEX_J]), ccorrp)
+        texte = police.render(f'Cartes restantes : {str(len(cartes))}', True, (255, 255, 255))
+        ecran.blit(texte, (300, 0))
+        pygame.draw.rect(ecran, (95, 59, 45), pygame.Rect(300, 40, 200, 40))
+        texte = police.render(f'Temps restant : {10 - (SECONDES//1000)}', True, (255, 255, 255))
+        ecran.blit(texte, (300, 40))
+        ETAT = 1
+        musique_jouer.play()
+        pygame.display.flip()
+
+    if SECONDES > 10000 and ETAT == 1 and len(cartes) > 0:
+        # changement de cartes après 10 secondes
+        TEMP += SECONDES
+        SECONDES = 0
+        ecran.fill(pygame.Color("black"))
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        retour = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        c = update((corr, b, cartes, carte, ecran, cimage, crota))
+        corr = c[0]
+        corrmi = c[1]
+        corrpi = c[2]
+        cimage = c[3]
+        crota = c[4]
+        texte = police.render(f'Cartes restantes : {str(len(cartes))}', True, (255, 255, 255))
+        ecran.blit(texte, (300, 0))
+        pygame.draw.rect(ecran, (95, 59, 45), pygame.Rect(300, 40, 200, 40))
+        texte = police.render(f'Temps restant : {10 - (SECONDES//1000)}', True, (255, 255, 255))
+        ecran.blit(texte, (300, 40))
+        pygame.display.flip()
+
+    if len(cartes) == 0 and ETAT == 1:
+        # affichage de l'écran de victoire
+        musique_jouer.stop()
+        ecran.fill("black")
+        ecran.blit(pygame.transform.scale(mj, (800, 600)), (0, 0))
+        retour = ecran.blit(pygame.transform.scale(brr, (50, 50)), (0, 0))
+        textev = pygame.font.SysFont("Corbel", 30).render(
+            f'Vous avez reconnu {SCORE} images sur 55!', True, (255, 255, 255))
+        textev2 = pygame.font.SysFont("Corbel", 30).render(
+            f'Ce qui vous donne un score de {round((SCORE/55)*100, 0)}%', True, (255, 255, 255))
+        textev3 = pygame.font.SysFont("Corbel", 30).render(
+            f'Le tout en {round((TEMP/1000), 1)} secondes!', True, (255, 255, 255))
+        ecran.blit(textev, (100, 270))
+        ecran.blit(textev2, (100, 300))
+        ecran.blit(textev3, (100, 330))
+        ETAT = 4
+        pygame.display.flip()
