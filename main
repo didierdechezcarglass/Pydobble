@@ -4,28 +4,28 @@ Made by didierdechezcarglass on github!
 import pygame
 from codes.fonctions import menuprincipal, gameloop, update, generateur, simb
 # toute les images stockés dans des variables qui peuvent être réutilisé dans fonctions!
-bj = pygame.image.load("images\\boutons\\button_jouer.png")
-br = pygame.image.load("images\\boutons\\button_regles.png")
-bq = pygame.image.load("images\\boutons\\button_quitter.png")
-brr = pygame.image.load("images\\boutons\\button_retour.png")
-bps = pygame.image.load("images\\boutons\\bouton_page_suivante.png")
-bpp = pygame.image.load("images\\boutons\\bouton_page_precedante.png")
-men = pygame.image.load("images\\menu\\menu.jpg")
-mj = pygame.image.load("images\\menu\\menu_jouer.jpg")
-mr = pygame.image.load("images\\menu\\pages_regles\\page_1.png")
-carte = pygame.image.load("images\\cartes\\rond carte.png")
+bj = pygame.image.load("images/boutons/button_jouer.png")
+br = pygame.image.load("images/boutons/button_regles.png")
+bq = pygame.image.load("images/boutons/button_quitter.png")
+brr = pygame.image.load("images/boutons/button_retour.png")
+bps = pygame.image.load("images/boutons/bouton_page_suivante.png")
+bpp = pygame.image.load("images/boutons/bouton_page_precedante.png")
+men = pygame.image.load("images/menu/menu.jpg")
+mj = pygame.image.load("images/menu/menu_jouer.jpg")
+mr = pygame.image.load("images/menu/pages_regles\\page_1.png")
+carte = pygame.image.load("images/cartes/rond carte.png")
 # création de l'affichage
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()
-sonc = pygame.mixer.Sound("sons\\click.mp3")
-sonok = pygame.mixer.Sound("sons\\ok.mp3")
-tournepage = pygame.mixer.Sound("sons\\tournepage.mp3")
-musique_jouer = pygame.mixer.Sound("sons\\musique_jouer.mp3")
-decompte = pygame.mixer.Sound("sons\\decompte.mp3")
+sonc = pygame.mixer.Sound("sons/click.mp3")
+sonok = pygame.mixer.Sound("sons/ok.mp3")
+tournepage = pygame.mixer.Sound("sons/tournepage.mp3")
+musique_jouer = pygame.mixer.Sound("sons/musique_jouer.mp3")
+decompte = pygame.mixer.Sound("sons/decompte.mp3")
 decompte.set_volume(0.3)
 pygame.display.set_caption("Le jeu du Dobble!")
-pygame.display.set_icon(pygame.image.load("images\\cartes\\symboles\\dobble.png"))
+pygame.display.set_icon(pygame.image.load("images/cartes/symboles/dobble.png"))
 # variables globales
 chrono = pygame.time.Clock()
 SECONDES = 0
@@ -165,7 +165,7 @@ def next_page_event(changed):
         tournepage.play()
         changed[0] += 1
         ecran.blit(pygame.transform.scale(pygame.image.load(
-            f"images\\menu\\pages_regles\\page_{changed[0]}.png"), (800, 600)), (0, 0))
+            f"images/menu/pages_regles/page_{changed[0]}.png"), (800, 600)), (0, 0))
         if changed[0] != 3:
             changed[1] = ecran.blit(pygame.transform.scale(bps, (50, 50), ), (750, 550))
         changed[2] = ecran.blit(pygame.transform.scale(bpp, (50, 50)), (0, 550))
@@ -182,7 +182,7 @@ def previous_page_event(changes):
         tournepage.play()
         changes[0] -= 1
         ecran.blit(pygame.transform.scale(pygame.image.load(
-            f"images\\menu\\pages_regles\\page_{changes[0]}.png"), (800, 600)), (0, 0))
+            f"images/menu/pages_regles/page_{changes[0]}.png"), (800, 600)), (0, 0))
         changes[1] = ecran.blit(pygame.transform.scale(bps, (50, 50), ), (750, 550))
         if changes[0] != 1:
             changes[2] = ecran.blit(pygame.transform.scale(bpp, (50, 50)), (0, 550))
@@ -280,10 +280,10 @@ while TOURNE:
         ccorrm = simb[corr[2].index(corrm)]
         ccorrp = simb[corr[3].index(corrp) - 8]
         corrmi = ecran.blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-            "images\\cartes\\symboles\\" + b[corrm]), (
+            "images/cartes/symboles\\" + b[corrm]), (
                 INDEX_M[0], INDEX_M[0])), INDEX_M[1]), ccorrm)
         corrpi = ecran.blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-            "images\\cartes\\symboles\\" + b[corrp]), (
+            "images/cartes/symboles/" + b[corrp]), (
                 cimage[INDEX_J], cimage[INDEX_J])), crota[INDEX_J]), ccorrp)
         texte = police.render(f'Cartes restantes : {str(len(cartes))}', True, (255, 255, 255))
         ecran.blit(texte, (300, 0))
