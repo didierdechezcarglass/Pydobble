@@ -9,10 +9,10 @@ def menuprincipal(ecran):
     """
     Permet de retourner au menu principal
     """
-    bouton_jouer = pygame.image.load("images\\boutons\\button_jouer.png")
-    bouton_retour = pygame.image.load("images\\boutons\\button_regles.png")
-    bouton_quitter = pygame.image.load("images\\boutons\\button_quitter.png")
-    men = pygame.image.load("images\\menu\\menu.jpg")
+    bouton_jouer = pygame.image.load("images/boutons/button_jouer.png")
+    bouton_retour = pygame.image.load("images/boutons/button_regles.png")
+    bouton_quitter = pygame.image.load("images/boutons/button_quitter.png")
+    men = pygame.image.load("images/menu/menu.jpg")
     ecran.blit(pygame.transform.scale(men, (800, 600)), (0, 0))
     jouer = ecran.blit(pygame.transform.scale(bouton_jouer, (200, 50)), (300, 250))
     retour = ecran.blit(pygame.transform.scale(bouton_retour, (200, 50)), (300, 305))
@@ -134,7 +134,7 @@ def blitcarte(stockage):
     for i in range(len(stockage[0])):
         if stockage[0][i] != stockage[2]:
             stockage[4].blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-                "images\\cartes\\symboles\\" + stockage[3][stockage[0][i]]),
+                "images/cartes/symboles/" + stockage[3][stockage[0][i]]),
                 (stockage[5][i], stockage[5][i])), stockage[6][i]), simb[i])
         else:
             indicateur_correspondance_millieu = stockage[5][i], stockage[5][i]
@@ -145,7 +145,7 @@ def blitcarte(stockage):
             stockage[6].append(randint(0, 359))
             stockage[5].append(randint(40, 50))
             stockage[4].blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-                "images\\cartes\\symboles\\" + stockage[3][stockage[1][i - 8]]),
+                "images/cartes/symboles/" + stockage[3][stockage[1][i - 8]]),
                 (stockage[5][i - 8], stockage[5][i - 8])), stockage[6][i - 8]), simb[i])
         else:
             stockage[6].append(randint(0, 359))
@@ -192,10 +192,10 @@ def update(items):
     ccorrm = simb[corr[2].index(corrm)]
     ccorrp = simb[corr[3].index(corrp) - 8]
     corrmi = items[4].blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-        "images\\cartes\\symboles\\" + items[1][corrm]), (
+        "images/cartes/symboles/" + items[1][corrm]), (
         index_m[0], index_m[0])), index_m[1]), ccorrm)
     corrpi = items[4].blit(pygame.transform.rotate(pygame.transform.scale(pygame.image.load(
-        "images\\cartes\\symboles\\" + items[1][corrp]), (
+        "images/cartes/symboles/" + items[1][corrp]), (
             listetaille[index_j], listetaille[index_j])),
         listerotation[index_j]), ccorrp)
     return corr, corrmi, corrpi, listetaille, listerotation
